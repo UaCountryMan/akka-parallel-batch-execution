@@ -2,6 +2,8 @@ package com.zemlyak.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.zemlyak.akka.parallelization.ParallelExecutingActor;
+import com.zemlyak.akka.parallelization.ParallelExecutingWorkerFactory;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -10,14 +12,15 @@ public class App {
     public static void main(String[] args) {
         ActorSystem system = ActorSystem.create("sample1");
 
-        final ActorRef parallelExecutingActor = system.actorOf(ParallelExecutingActor.props(), "ParallelExecutingActor");
+        final ParallelExecutingWorkerFactory workerFactory = new BatchSummingWorkerFactory();
+        final ActorRef parallelExecutingActor = system.actorOf(ParallelExecutingActor.props(workerFactory), "ParallelExecutingActor");
+        final ActorRef batchSummingActor = system.actorOf(BatchSummingActor.props(parallelExecutingActor), "BatchSummingActor");
 
         for (int i = 0; i < 5; i++) {
-            int some = i;
             new Thread(() ->
             {
                 for (int j = 0; j < 5; j++) {
-                    parallelExecutingActor.tell(new ParallelExecutingActor.TaskBatch(some * 5 + j, Arrays.asList(new ParallelExecutingActor.TaskBatch.SumTask(Arrays.asList(1,2,3)), new ParallelExecutingActor.TaskBatch.SumTask(Arrays.asList(4,5,6)), new ParallelExecutingActor.TaskBatch.SumTask(Arrays.asList(7,8,9)))), ActorRef.noSender());
+                    batchSummingActor.tell(new BatchSummingActor.SumTask(Arrays.asList(1,2,3,4,5,6,7,8,9)), ActorRef.noSender());
                 }
             })
             .start();
