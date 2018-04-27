@@ -2,8 +2,10 @@ package com.zemlyak.akka;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.zemlyak.akka.adapter.rx.ObservableUtil;
 import com.zemlyak.akka.parallelization.ParallelExecutingActor;
 import com.zemlyak.akka.parallelization.ParallelExecutingWorkerFactory;
+import io.reactivex.schedulers.Schedulers;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -27,10 +29,20 @@ public class App {
         }
 
         System.out.println("Start");
+        testObservable(system);
         Scanner in = new Scanner(System.in);
         in.nextLine();
         System.out.println("Finish");
         System.out.println(parallelExecutingActor.toString());
         system.terminate();
+    }
+
+    private static void testObservable(ActorSystem system) {
+        final ActorRef pongActor = system.actorOf(PongActor.props(), "pong");
+
+        ObservableUtil
+                .fromActor(system, pongActor, "ping")
+                .observeOn(Schedulers.computation())
+                .subscribe(System.out::println);
     }
 }
