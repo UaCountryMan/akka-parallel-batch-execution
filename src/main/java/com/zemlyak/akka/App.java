@@ -43,6 +43,11 @@ public class App {
         ObservableUtil
                 .fromActor(system, pongActor, "ping")
                 .observeOn(Schedulers.computation())
-                .subscribe(System.out::println);
+                .subscribe(System.out::println, t -> System.out.println("[error] " + t));
+
+        ObservableUtil
+                .fromActor(system, pongActor, "some")
+                .observeOn(Schedulers.computation())
+                .subscribe(System.out::println, t -> System.out.println("[error] " + t));
     }
 }

@@ -2,13 +2,15 @@ package com.zemlyak.akka;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
+import akka.actor.Status;
 
 public class PongActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .matchAny(message -> getSender().tell("pong", self()))
+                .matchEquals("ping", message -> getSender().tell("pong", self()))
+                .match(String.class, message -> getSender().tell(new Status.Failure(new RuntimeException("Unsupported command: " + message)), self()))
                 .build();
     }
 
