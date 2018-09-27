@@ -32,12 +32,9 @@ public class FetchingInFewStageTest {
     private static Single<String> createDelayedEmitterScheduler2(String value, long emissionDelayMillis) {
         System.out.println("[creation] " + value);
         SingleSubject<String> subject = SingleSubject.create();
-        scheduler
-                .schedule(
-                        () -> {System.out.println("[emission] " + value);subject.onSuccess(value);},
-                        emissionDelayMillis,
-                        TimeUnit.MILLISECONDS
-                );
+
+        createDelayedEmitterScheduler(value, emissionDelayMillis)
+                .subscribe(subject);
         return subject
                 .subscribeOn(Schedulers.io());
     }
