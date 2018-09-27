@@ -1,14 +1,14 @@
 package com.zemlyak.akka.adapter.rx;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import io.reactivex.Single;
+import scala.concurrent.ExecutionContextExecutor;
 
 public class ObservableUtil {
 
-    public static <T> Single<T> fromActor(ActorSystem system, ActorRef actor, Object message){
+    public static <T> Single<T> fromActor(ActorRef actor, Object message, ExecutionContextExecutor executor){
         return Single.create(singleEmitter -> Patterns
                 .ask(actor, message, 5000)
                 .onComplete(new OnComplete<Object>() {
@@ -20,6 +20,6 @@ public class ObservableUtil {
                             singleEmitter.onSuccess((T)success);
                         }
                     }
-                }, system.dispatcher()));
+                }, executor));
     }
 }
